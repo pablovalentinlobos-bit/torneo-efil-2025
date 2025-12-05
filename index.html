@@ -158,11 +158,29 @@
 
                 <!-- TEAM MANAGEMENT -->
                 <div class="card">
+                    <h3>Agregar Equipo</h3>
+                    <form id="add-team-form">
+                        <div class="form-group">
+                            <label>Nombre del Equipo</label>
+                            <input type="text" id="team-name" required placeholder="Ej. Los Rayos">
+                        </div>
+                        <div class="form-group">
+                            <label>Grupo (Opcional)</label>
+                            <select id="team-group">
+                                <option value="">Sin Grupo</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar Equipo</button>
+                    </form>
+                    <div id="admin-teams-list" style="margin-top: 15px;">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
 
             <!-- MATCH MANAGEMENT -->
-            <div class="card">
+            <div class="card full-width">
                 <h3>Crear Partido</h3>
                 <form id="add-match-form">
                     <div class="form-group">
@@ -179,7 +197,6 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Crear Partido</button>
                 </form>
-            </div>
             </div>
 
             <div class="card full-width">

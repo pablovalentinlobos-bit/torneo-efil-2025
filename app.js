@@ -584,6 +584,47 @@ function renderCups() {
     `).join('');
 }
 
+function renderMatches() {
+    const container = document.getElementById('matches-list');
+    if (!container) return;
+
+    if (state.matches.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-light)">No hay partidos programados.</p>';
+        return;
+    }
+
+    // Sort matches by date
+    const sortedMatches = [...state.matches].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    container.innerHTML = sortedMatches.map(match => {
+        const home = state.teams.find(t => t.id === match.homeId);
+        const away = state.teams.find(t => t.id === match.awayId);
+        if (!home || !away) return '';
+
+        return `
+            <div class="match-card">
+                <div class="match-teams">
+                    <div class="match-team">
+                        <span class="team-cell">
+                            ${home.name}
+                        </span>
+                        <span class="match-score">${match.played ? match.homeScore : '-'}</span>
+                    </div>
+                    <div class="match-team">
+                        <span class="team-cell">
+                            ${away.name}
+                        </span>
+                        <span class="match-score">${match.played ? match.awayScore : '-'}</span>
+                    </div>
+                </div>
+                <div class="match-meta">
+                    ${match.played ? 'Finalizado' : new Date(match.date).toLocaleString()}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function renderStandings() {
     const container = document.getElementById('standings-container');
     container.innerHTML = '';
