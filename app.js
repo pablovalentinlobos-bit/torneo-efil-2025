@@ -13,6 +13,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Enable Offline Persistence
+db.enablePersistence()
+    .catch((err) => {
+        if (err.code == 'failed-precondition') {
+            console.log('Persistence failed: Multiple tabs open');
+        } else if (err.code == 'unimplemented') {
+            console.log('Persistence not supported by browser');
+        }
+    });
+
 // State Management
 const state = {
     teams: [],
@@ -50,11 +60,11 @@ function initRealTimeUpdates() {
 
 // Utils
 const saveCollection = (col) => {
-    if (col === 'config') {
-        db.collection('efil_data').doc(col).set({ adminPass: state.adminPass });
-    } else {
-        db.collection('efil_data').doc(col).set({ list: state[col] });
-    }
+    const data = col === 'config' ? { adminPass: state.adminPass } : { list: state[col] };
+
+    db.collection('efil_data').doc(col).set(data)
+        .then(() => console.log(`[Firebase] Saved ${col} successfully`))
+        .catch((error) => console.error(`[Firebase] Error saving ${col}:`, error));
 };
 
 const saveState = () => {
