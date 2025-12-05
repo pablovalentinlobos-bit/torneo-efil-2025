@@ -113,6 +113,18 @@
                     </div>
                 </div>
 
+                <!-- CONFIGURATION -->
+                <div class="card full-width">
+                    <h3>Configuración</h3>
+                    <form id="change-password-form" style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Nueva Contraseña de Administrador</label>
+                            <input type="password" id="new-admin-pass" required placeholder="Nueva contraseña">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">Cambiar</button>
+                    </form>
+                </div>
+
                 <!-- ALERTS MANAGEMENT -->
                 <div class="card full-width">
                     <h3>Gestionar Alertas</h3>
@@ -146,50 +158,28 @@
 
                 <!-- TEAM MANAGEMENT -->
                 <div class="card">
-                    <h3>Agregar Equipo</h3>
-                    <form id="add-team-form">
-                        <div class="form-group">
-                            <label>Nombre del Equipo</label>
-                            <input type="text" id="team-name" required placeholder="Ej. Los Tigres">
-                        </div>
-                        <div class="form-group">
-                            <label>Grupo</label>
-                            <select id="team-group">
-                                <option value="">Sin Grupo</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>URL del Escudo (Opcional)</label>
-                            <input type="url" id="team-logo" placeholder="https://...">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Guardar Equipo</button>
-                    </form>
+                </div>
+            </div>
 
-                    <h4 style="margin-top: 20px; margin-bottom: 10px;">Equipos Existentes</h4>
-                    <div id="admin-teams-list" style="max-height: 300px; overflow-y: auto;">
-                        <!-- Populated by JS -->
+            <!-- MATCH MANAGEMENT -->
+            <div class="card">
+                <h3>Crear Partido</h3>
+                <form id="add-match-form">
+                    <div class="form-group">
+                        <label>Local</label>
+                        <select id="match-home" required></select>
                     </div>
-                </div>
-
-                <!-- MATCH MANAGEMENT -->
-                <div class="card">
-                    <h3>Crear Partido</h3>
-                    <form id="add-match-form">
-                        <div class="form-group">
-                            <label>Local</label>
-                            <select id="match-home" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Visitante</label>
-                            <select id="match-away" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha/Hora</label>
-                            <input type="datetime-local" id="match-date">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Crear Partido</button>
-                    </form>
-                </div>
+                    <div class="form-group">
+                        <label>Visitante</label>
+                        <select id="match-away" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha/Hora</label>
+                        <input type="datetime-local" id="match-date">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear Partido</button>
+                </form>
+            </div>
             </div>
 
             <div class="card full-width">

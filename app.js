@@ -5,6 +5,7 @@ const state = {
     alerts: JSON.parse(localStorage.getItem('efil_alerts')) || [],
     groups: JSON.parse(localStorage.getItem('efil_groups')) || [],
     cups: JSON.parse(localStorage.getItem('efil_cups')) || [],
+    adminPass: localStorage.getItem('efil_admin_pass') || 'efil2025',
     isAuthenticated: sessionStorage.getItem('efil_auth') === 'true'
 };
 window.efilState = state;
@@ -15,7 +16,9 @@ const saveState = () => {
     localStorage.setItem('efil_matches', JSON.stringify(state.matches));
     localStorage.setItem('efil_alerts', JSON.stringify(state.alerts));
     localStorage.setItem('efil_groups', JSON.stringify(state.groups));
+    localStorage.setItem('efil_groups', JSON.stringify(state.groups));
     localStorage.setItem('efil_cups', JSON.stringify(state.cups));
+    localStorage.setItem('efil_admin_pass', state.adminPass);
     renderAll();
 };
 
@@ -77,7 +80,7 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     const user = document.getElementById('admin-user').value;
     const pass = document.getElementById('admin-pass').value;
 
-    if (user === 'admin' && pass === 'efil2025') {
+    if (user === 'admin' && pass === state.adminPass) {
         state.isAuthenticated = true;
         sessionStorage.setItem('efil_auth', 'true');
         navigateTo('admin-dashboard');
@@ -92,6 +95,22 @@ function logout() {
     sessionStorage.removeItem('efil_auth');
     navigateTo('home');
 }
+
+
+
+// Configuration
+document.getElementById('change-password-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newPass = document.getElementById('new-admin-pass').value;
+    if (newPass && newPass.trim().length > 3) {
+        state.adminPass = newPass.trim();
+        saveState();
+        alert('Contraseña actualizada correctamente.');
+        e.target.reset();
+    } else {
+        alert('La contraseña debe tener al menos 4 caracteres.');
+    }
+});
 
 // Alerts
 document.getElementById('add-alert-form').addEventListener('submit', (e) => {
@@ -154,10 +173,9 @@ function editGroup(id) {
 document.getElementById('add-team-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('team-name').value;
-    const logo = document.getElementById('team-logo').value || 'https://via.placeholder.com/50?text=EFIL';
     const groupId = document.getElementById('team-group').value || null;
 
-    state.teams.push({ id: generateId(), name, logo, groupId });
+    state.teams.push({ id: generateId(), name, groupId });
     saveState();
     e.target.reset();
     alert('Equipo agregado!');
@@ -180,12 +198,6 @@ function editTeam(id) {
     if (newName !== null && newName.trim() !== '') {
         team.name = newName;
 
-        // Simple prompt for group change is tricky, let's just stick to name for now via prompt, 
-        // or we could build a modal. For simplicity/speed requested:
-        const newLogo = prompt('Nueva URL del escudo (dejar igual para mantener):', team.logo);
-        if (newLogo !== null && newLogo.trim() !== '') {
-            team.logo = newLogo;
-        }
         saveState();
     }
 }
@@ -390,7 +402,6 @@ function renderAdminPanel() {
         teamsList.innerHTML = state.teams.map(t => `
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid var(--border);">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${t.logo}" style="width:20px; height:20px; object-fit:contain;">
                     <span>${t.name}</span>
                     <span style="font-size:0.8em; color:gray;">(${state.groups.find(g => g.id === t.groupId)?.name || 'Sin Grupo'})</span>
                 </div>
@@ -549,14 +560,12 @@ function renderCups() {
                                     <div class="bracket-match">
                                         <div class="bracket-team">
                                             <span>
-                                                <img src="${home.logo || 'https://via.placeholder.com/20'}" alt="">
                                                 ${home.name}
                                             </span>
                                             <span class="bracket-score">${m.played ? m.homeScore : '-'}</span>
                                         </div>
                                         <div class="bracket-team">
                                             <span>
-                                                <img src="${away.logo || 'https://via.placeholder.com/20'}" alt="">
                                                 ${away.name}
                                             </span>
                                             <span class="bracket-score">${m.played ? m.awayScore : '-'}</span>
@@ -641,7 +650,6 @@ function renderStandings() {
                                     <td>${index + 1}</td>
                                     <td>
                                         <div class="team-cell">
-                                            <img src="${t.logo}" class="team-logo-sm" alt="">
                                             ${t.name}
                                         </div>
                                     </td>
