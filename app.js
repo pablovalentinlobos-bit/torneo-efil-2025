@@ -1,34 +1,75 @@
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyCrsjeR5XFqs_SPfbraIeeLPqJxM4BsLW0",
+    authDomain: "efil-2025.firebaseapp.com",
+    projectId: "efil-2025",
+    storageBucket: "efil-2025.firebasestorage.app",
+    messagingSenderId: "500133646740",
+    appId: "1:500133646740:web:fca61cd3b65fd1f853ff81",
+    measurementId: "G-X3QHSQE45M"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // State Management
 const state = {
-    teams: JSON.parse(localStorage.getItem('efil_teams')) || [],
-    matches: JSON.parse(localStorage.getItem('efil_matches')) || [],
-    alerts: JSON.parse(localStorage.getItem('efil_alerts')) || [],
-    groups: JSON.parse(localStorage.getItem('efil_groups')) || [],
-    cups: JSON.parse(localStorage.getItem('efil_cups')) || [],
-    adminPass: localStorage.getItem('efil_admin_pass') || 'efil2025',
-    isAuthenticated: sessionStorage.getItem('efil_auth') === 'true'
+    teams: [],
+    matches: [],
+    alerts: [],
+    groups: [],
+    cups: [],
+    adminPass: 'efil2025', // Default, will be overwritten by DB
+    isAuthenticated: sessionStorage.getItem('efil_auth') === 'true',
+    loading: true
 };
 window.efilState = state;
 
+// Real-time Listeners
+function initRealTimeUpdates() {
+    const collections = ['teams', 'matches', 'alerts', 'groups', 'cups', 'config'];
+
+    collections.forEach(col => {
+        db.collection('efil_data').doc(col).onSnapshot(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (col === 'config') {
+                    state.adminPass = data.adminPass || 'efil2025';
+                } else {
+                    state[col] = data.list || [];
+                }
+            } else {
+                // Initialize doc if it doesn't exist (first run)
+                if (col !== 'config') saveCollection(col);
+            }
+            renderAll();
+        });
+    });
+}
+
 // Utils
-const saveState = () => {
-    localStorage.setItem('efil_teams', JSON.stringify(state.teams));
-    localStorage.setItem('efil_matches', JSON.stringify(state.matches));
-    localStorage.setItem('efil_alerts', JSON.stringify(state.alerts));
-    localStorage.setItem('efil_groups', JSON.stringify(state.groups));
-    localStorage.setItem('efil_groups', JSON.stringify(state.groups));
-    localStorage.setItem('efil_cups', JSON.stringify(state.cups));
-    localStorage.setItem('efil_admin_pass', state.adminPass);
-    renderAll();
+const saveCollection = (col) => {
+    if (col === 'config') {
+        db.collection('efil_data').doc(col).set({ adminPass: state.adminPass });
+    } else {
+        db.collection('efil_data').doc(col).set({ list: state[col] });
+    }
 };
 
-// Data Migration (Legacy Support)
-state.cups.forEach(cup => {
-    cup.matches.forEach(m => {
-        if (!m.phase) m.phase = 'Octavos';
-    });
-});
-saveState();
+const saveState = () => {
+    // We identify what changed based on context, but for simplicity in this migration,
+    // we will save ALL collections when something changes. 
+    // Optimization: In the future, pass the specific collection to save.
+
+    // For now, to keep existing calls working, we save everything.
+    // This is not efficient but safe for migration.
+    ['teams', 'matches', 'alerts', 'groups', 'cups'].forEach(col => saveCollection(col));
+    saveCollection('config');
+};
+
+// Start Listeners
+initRealTimeUpdates();
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
