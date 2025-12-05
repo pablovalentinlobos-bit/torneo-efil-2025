@@ -20,6 +20,7 @@
                 <li><a href="#" data-target="home" class="active">Inicio</a></li>
                 <li><a href="#" data-target="standings">Tabla</a></li>
                 <li><a href="#" data-target="matches">Partidos</a></li>
+                <li><a href="#" data-target="copas">Copas</a></li>
                 <li><a href="#" data-target="admin">Admin</a></li>
             </ul>
         </div>
@@ -62,6 +63,14 @@
             </div>
         </section>
 
+        <!-- COPAS VIEW -->
+        <section id="copas" class="view">
+            <h2>Copas</h2>
+            <div id="copas-container">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
         <!-- ADMIN LOGIN VIEW -->
         <section id="admin-login" class="view">
             <div class="login-card">
@@ -89,6 +98,21 @@
             </div>
 
             <div class="admin-grid">
+                <!-- COPAS MANAGEMENT -->
+                <div class="card full-width">
+                    <h3>Gestionar Copas</h3>
+                    <form id="add-cup-form">
+                        <div class="form-group">
+                            <label>Nombre de la Copa</label>
+                            <input type="text" id="cup-name" required placeholder="Ej. Copa de Oro">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Copa</button>
+                    </form>
+                    <div id="admin-cups-list" style="margin-top: 20px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
                 <!-- ALERTS MANAGEMENT -->
                 <div class="card full-width">
                     <h3>Gestionar Alertas</h3>

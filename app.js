@@ -4,8 +4,10 @@ const state = {
     matches: JSON.parse(localStorage.getItem('efil_matches')) || [],
     alerts: JSON.parse(localStorage.getItem('efil_alerts')) || [],
     groups: JSON.parse(localStorage.getItem('efil_groups')) || [],
+    cups: JSON.parse(localStorage.getItem('efil_cups')) || [],
     isAuthenticated: sessionStorage.getItem('efil_auth') === 'true'
 };
+window.efilState = state;
 
 // Utils
 const saveState = () => {
@@ -13,8 +15,17 @@ const saveState = () => {
     localStorage.setItem('efil_matches', JSON.stringify(state.matches));
     localStorage.setItem('efil_alerts', JSON.stringify(state.alerts));
     localStorage.setItem('efil_groups', JSON.stringify(state.groups));
+    localStorage.setItem('efil_cups', JSON.stringify(state.cups));
     renderAll();
 };
+
+// Data Migration (Legacy Support)
+state.cups.forEach(cup => {
+    cup.matches.forEach(m => {
+        if (!m.phase) m.phase = 'Octavos';
+    });
+});
+saveState();
 
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
@@ -57,6 +68,7 @@ function navigateTo(targetId) {
     if (targetId === 'matches') renderMatches();
     if (targetId === 'admin-dashboard') renderAdminPanel();
     if (targetId === 'home') renderAlerts();
+    if (targetId === 'copas') renderCups();
 }
 
 // Authentication
@@ -230,6 +242,101 @@ function deleteMatch(id) {
     }
 }
 
+// Copas Logic
+document.getElementById('add-cup-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('cup-name').value;
+    state.cups.push({
+        id: generateId(),
+        name,
+        teams: [], // Array of strings (names) or objects
+        matches: [] // Array of match objects specific to this cup
+    });
+    saveState();
+    e.target.reset();
+});
+
+function deleteCup(id) {
+    if (confirm('¿Eliminar esta copa?')) {
+        state.cups = state.cups.filter(c => c.id !== id);
+        saveState();
+    }
+}
+
+function addTeamToCup(cupId) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+    const name = prompt('Nombre del equipo para la copa:');
+    if (name && name.trim()) {
+        cup.teams.push({ id: generateId(), name: name.trim() });
+        saveState();
+    }
+}
+
+function deleteTeamFromCup(cupId, teamId) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+    if (confirm('¿Eliminar equipo de la copa?')) {
+        cup.teams = cup.teams.filter(t => t.id !== teamId);
+        // Also remove matches involving this team? For simplicity, keeping matches but they might look weird.
+        saveState();
+    }
+}
+
+function addMatchToCup(cupId) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+
+    // Simple prompt-based flow for now to avoid complex UI in admin panel
+    if (cup.teams.length < 2) {
+        alert('Necesitas al menos 2 equipos en la copa.');
+        return;
+    }
+
+    // Create a temporary UI or just use prompts? 
+    // Let's use a cleaner approach: We will render a mini-form inside the cup card in renderAdminPanel
+    // So this function is just a placeholder or helper if needed.
+    // Actually, let's implement the logic called by the form submit.
+}
+
+function createCupMatch(cupId, homeId, awayId, date, phase) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+
+    cup.matches.push({
+        id: generateId(),
+        homeId,
+        awayId,
+        date,
+        phase,
+        homeScore: null,
+        awayScore: null,
+        played: false
+    });
+    saveState();
+}
+
+function deleteMatchFromCup(cupId, matchId) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+    if (confirm('¿Eliminar partido?')) {
+        cup.matches = cup.matches.filter(m => m.id !== matchId);
+        saveState();
+    }
+}
+
+function updateCupMatchResult(cupId, matchId, homeScore, awayScore) {
+    const cup = state.cups.find(c => c.id === cupId);
+    if (!cup) return;
+    const match = cup.matches.find(m => m.id === matchId);
+    if (match) {
+        match.homeScore = homeScore === '' ? null : parseInt(homeScore);
+        match.awayScore = awayScore === '' ? null : parseInt(awayScore);
+        match.played = (match.homeScore !== null && match.awayScore !== null);
+        saveState();
+    }
+}
+
 // Rendering
 function renderAlerts() {
     const container = document.getElementById('alerts-container');
@@ -335,44 +442,137 @@ function renderAdminPanel() {
             </div>
         `;
     }).join('');
+
+
+    // Render Cups Management
+    const cupsList = document.getElementById('admin-cups-list');
+    if (cupsList) {
+        cupsList.innerHTML = state.cups.map(cup => {
+            const teamOptions = cup.teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+            return `
+            <div class="card" style="margin-bottom: 20px; border: 1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="margin:0;">${cup.name}</h4>
+                    <button onclick="deleteCup('${cup.id}')" style="color:red; border:none; background:none; cursor:pointer;">&times; Eliminar Copa</button>
+                </div>
+                
+                <!-- Teams Section -->
+                <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                    <h5 style="margin-top:0;">Equipos (${cup.teams.length})</h5>
+                    <button class="btn btn-sm btn-outline" onclick="addTeamToCup('${cup.id}')" style="margin-bottom:10px;">+ Agregar Equipo Manual</button>
+                    <ul style="list-style:none; padding:0;">
+                        ${cup.teams.map(t => `
+                            <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee;">
+                                <span>${t.name}</span>
+                                <button onclick="deleteTeamFromCup('${cup.id}', '${t.id}')" style="color:red; border:none; background:none; cursor:pointer;">&times;</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <!-- Matches Section -->
+                <div style="padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                    <h5 style="margin-top:0;">Partidos</h5>
+                    <form onsubmit="event.preventDefault(); createCupMatch('${cup.id}', this.home.value, this.away.value, this.date.value, this.phase.value); this.reset();" style="display:grid; gap:10px; margin-bottom:10px;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <select name="home" required><option value="">Local</option>${teamOptions}</select>
+                            <select name="away" required><option value="">Visitante</option>${teamOptions}</select>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+                            <input type="datetime-local" name="date" required>
+                            <select name="phase" required>
+                                <option value="Octavos">Octavos</option>
+                                <option value="Cuartos">Cuartos</option>
+                                <option value="Semis">Semis</option>
+                                <option value="Final">Final</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">Agregar Partido</button>
+                    </form>
+                    
+                    <div>
+                        ${cup.matches.map(m => {
+                const home = cup.teams.find(t => t.id === m.homeId);
+                const away = cup.teams.find(t => t.id === m.awayId);
+                if (!home || !away) return '';
+                return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #eee; font-size:0.9em;">
+                                    <div style="flex:1;">
+                                        <div>${home.name} vs ${away.name}</div>
+                                        <div style="font-size:0.8em; color:gray;">${new Date(m.date).toLocaleString()}</div>
+                                    </div>
+                                    <div style="display:flex; gap:5px; align-items:center;">
+                                        <input type="number" style="width:30px;" placeholder="L" value="${m.homeScore !== null ? m.homeScore : ''}" 
+                                            onchange="updateCupMatchResult('${cup.id}', '${m.id}', this.value, this.nextElementSibling.value)">
+                                        <input type="number" style="width:30px;" placeholder="V" value="${m.awayScore !== null ? m.awayScore : ''}"
+                                            onchange="updateCupMatchResult('${cup.id}', '${m.id}', this.previousElementSibling.value, this.value)">
+                                        <button onclick="deleteMatchFromCup('${cup.id}', '${m.id}')" style="color:red; border:none; background:none; cursor:pointer;">&times;</button>
+                                    </div>
+                                </div>
+                            `;
+            }).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
 }
 
-function renderMatches() {
-    const list = document.getElementById('matches-list');
-    if (state.matches.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:var(--text-light)">No hay partidos programados.</p>';
+function renderCups() {
+    const container = document.getElementById('copas-container');
+    if (!container) return;
+
+    if (state.cups.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-light)">No hay copas activas.</p>';
         return;
     }
 
-    list.innerHTML = state.matches.map(match => {
-        const home = state.teams.find(t => t.id === match.homeId);
-        const away = state.teams.find(t => t.id === match.awayId);
+    const phases = ['Octavos', 'Cuartos', 'Semis', 'Final'];
+
+    container.innerHTML = state.cups.map(cup => `
+        <div class="card" style="margin-bottom: 30px; background: transparent; box-shadow: none; border: none; padding: 0;">
+            <h3 style="color:var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px;">${cup.name}</h3>
+            
+            <div class="bracket-view">
+                <div class="bracket-container">
+                    ${phases.map(phase => `
+                        <div class="bracket-round">
+                            <div class="bracket-title">${phase}</div>
+                            ${cup.matches.filter(m => m.phase === phase).map(m => {
+        const home = cup.teams.find(t => t.id === m.homeId);
+        const away = cup.teams.find(t => t.id === m.awayId);
         if (!home || !away) return '';
 
         return `
-            <div class="match-card">
-                <div class="match-teams">
-                    <div class="match-team">
-                        <span class="team-cell">
-                            <img src="${home.logo}" class="team-logo-sm" alt="">
-                            ${home.name}
-                        </span>
-                        <span class="match-score">${match.played ? match.homeScore : '-'}</span>
-                    </div>
-                    <div class="match-team">
-                        <span class="team-cell">
-                            <img src="${away.logo}" class="team-logo-sm" alt="">
-                            ${away.name}
-                        </span>
-                        <span class="match-score">${match.played ? match.awayScore : '-'}</span>
-                    </div>
-                </div>
-                <div class="match-meta">
-                    ${match.played ? 'Finalizado' : new Date(match.date).toLocaleString()}
+                                    <div class="bracket-match">
+                                        <div class="bracket-team">
+                                            <span>
+                                                <img src="${home.logo || 'https://via.placeholder.com/20'}" alt="">
+                                                ${home.name}
+                                            </span>
+                                            <span class="bracket-score">${m.played ? m.homeScore : '-'}</span>
+                                        </div>
+                                        <div class="bracket-team">
+                                            <span>
+                                                <img src="${away.logo || 'https://via.placeholder.com/20'}" alt="">
+                                                ${away.name}
+                                            </span>
+                                            <span class="bracket-score">${m.played ? m.awayScore : '-'}</span>
+                                        </div>
+                                        <div class="bracket-meta">
+                                            ${m.played ? 'Finalizado' : new Date(m.date).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                `;
+    }).join('')}
+                        </div>
+                    `).join('')}
                 </div>
             </div>
-        `;
-    }).join('');
+        </div>
+    `).join('');
 }
 
 function renderStandings() {
