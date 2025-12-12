@@ -235,7 +235,7 @@ function renderCups() {
             if (m.date) {
                 const dateObj = new Date(m.date);
                 if (!isNaN(dateObj.getTime())) {
-                    dateStr = `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                    dateStr = `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
                 }
             }
 
