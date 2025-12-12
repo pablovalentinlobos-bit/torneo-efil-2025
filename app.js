@@ -231,11 +231,14 @@ function renderCups() {
             if (!h || !a) return '';
 
             // Format Date
-            let dateStr = 'A confirmar';
+            // Format Date
+            let dateHtml = '<div>A confirmar</div>';
             if (m.date) {
                 const dateObj = new Date(m.date);
                 if (!isNaN(dateObj.getTime())) {
-                    dateStr = `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+                    const d = dateObj.toLocaleDateString();
+                    const t = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                    dateHtml = `<div style="text-align:center;line-height:1.2;"><div>${d}</div><div style="font-size:1.1em;font-weight:bold;">${t}</div></div>`;
                 }
             }
 
@@ -251,9 +254,9 @@ function renderCups() {
                     <div style="font-weight:bold; font-size: 1.1em;">${h.name} <span style="background:#333;color:white;padding:2px 6px;border-radius:4px;margin:0 5px;">${m.played ? m.homeScore : '-'}</span></div>
                     <div style="font-weight:bold; font-size: 1.1em;">${a.name} <span style="background:#333;color:white;padding:2px 6px;border-radius:4px;margin:0 5px;">${m.played ? m.awayScore : '-'}</span></div>
                 </div>
-                <div style="text-align:right; font-size:0.9em; color:#666;">
-                    <div>${dateStr}</div>
-                    ${m.played ? '<span style="color:green">Finalizado</span>' : '<span style="color:#e67e22">Programado</span>'}
+                <div style="text-align:right; font-size:0.9em; color:#666; display:flex; flex-direction:column; align-items:flex-end;">
+                    ${dateHtml}
+                    ${m.played ? '<div style="color:green;margin-top:2px;">Finalizado</div>' : '<div style="color:#e67e22;margin-top:2px;">Programado</div>'}
                 </div>
             </div>
             `;
