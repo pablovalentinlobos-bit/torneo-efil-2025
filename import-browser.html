@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Datos a Firebase - EFIL 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f8ff;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #75AADB;
+        }
+
+        button {
+            background: #75AADB;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #5b8db8;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            font-size: 16px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        ul {
+            line-height: 1.8;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Importar Datos del Torneo a Firebase</h1>
+
+        <p><strong>Este archivo importará automáticamente los 36 partidos a Firebase.</strong></p>
+
+        <div id="status"></div>
+
+        <button id="importBtn" onclick="importData()">✅ IMPORTAR DATOS A FIREBASE</button>
+
+        <h3>📋 Instrucciones:</h3>
+        <ol>
+            <li>Asegúrate de estar conectado a internet</li>
+            <li>Haz clic en el botón verde "IMPORTAR DATOS"</li>
+            <li>Espera el mensaje de confirmación (unos segundos)</li>
+            <li>¡Listo! Abre tu app para ver los partidos</li>
+        </ol>
+
+        <h3>📊 Datos a importar:</h3>
+        <ul>
+            <li>✅ 36 partidos</li>
+            <li>✅ 6 zonas (A, B, C, D, E, F)</li>
+            <li>✅ Fechas del 5 al 10 de diciembre 2024</li>
+            <li>✅ Equipos y horarios completos</li>
+        </ul>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEqSXwobd7kKlJVMYi9aSAxKEBnFOLdQo",
+            authDomain: "torneo-efil-2025.firebaseapp.com",
+            projectId: "torneo-efil-2025",
+            storageBucket: "torneo-efil-2025.firebasestorage.app",
+            messagingSenderId: "1027732633033",
+            appId: "1:1027732633033:web:f5e5e6a1c8f9e0b1c2d3e4"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Tournament Data (embedded)
+        const tournamentData = { "matches": { "1": { "team1": "E.F.I.L.", "team2": "URIBE (VERDE)", "group": "A", "date": "2024-12-05", "time": "16:00", "score1": null, "score2": null }, "2": { "team1": "URIBE (AMARILLO)", "team2": "MOSTRANDO CAMINOS", "group": "E", "date": "2024-12-05", "time": "17:00", "score1": null, "score2": null }, "3": { "team1": "MADRESELVA", "team2": "PLAZA ESPAÑA (25 DE MAYO)", "group": "D", "date": "2024-12-05", "time": "18:05", "score1": null, "score2": null }, "4": { "team1": "RIVADAVIA", "team2": "ROQUE PÉREZ", "group": "F", "date": "2024-12-05", "time": "19:10", "score1": null, "score2": null }, "5": { "team1": "E.F.I.N. (NAVARRO)", "team2": "LA BLANQUITA (MERLO)", "group": "B", "date": "2024-12-05", "time": "20:20", "score1": null, "score2": null }, "6": { "team1": "SAN MARTÍN NEGRO (MONTE GRANDE)", "team2": "EL PORVENIR (MERLO)", "group": "A", "date": "2024-12-05", "time": "21:30", "score1": null, "score2": null }, "7": { "team1": "SALGADO", "team2": "PROVINCIAL", "group": "B", "date": "2024-12-05", "time": "22:40", "score1": null, "score2": null }, "8": { "team1": "C.F.C. (BLANCO)", "team2": "LA BLANQUITA (MERLO)", "group": "C", "date": "2024-12-06", "time": "16:50", "score1": null, "score2": null }, "9": { "team1": "E.F.I.L.", "team2": "EL PORVENIR (MERLO)", "group": "A", "date": "2024-12-06", "time": "18:00", "score1": null, "score2": null }, "10": { "team1": "MADRESELVA", "team2": "DORREGO", "group": "D", "date": "2024-12-06", "time": "19:10", "score1": null, "score2": null }, "11": { "team1": "CAÑUELA F.C. (ROJO)", "team2": "FERRO (LAS FLORES)", "group": "E", "date": "2024-12-06", "time": "20:20", "score1": null, "score2": null }, "12": { "team1": "TRISTÁN SUÁREZ", "team2": "REAL STFC RC", "group": "F", "date": "2024-12-06", "time": "21:30", "score1": null, "score2": null }, "13": { "team1": "URIBE (AMARILLO)", "team2": "CAÑUELAS F.C. (ROJO)", "group": "E", "date": "2024-12-07", "time": "12:40", "score1": null, "score2": null }, "14": { "team1": "SAN MARTIN (MONTE GRANDE)", "team2": "URIBE (VERDE)", "group": "A", "date": "2024-12-07", "time": "13:50", "score1": null, "score2": null }, "15": { "team1": "MOSTRANDO CAMINOS", "team2": "FERRO (LAS FLORES)", "group": "E", "date": "2024-12-07", "time": "15:00", "score1": null, "score2": null }, "16": { "team1": "RIVADAVIA", "team2": "TRISTÁN SUÁREZ", "group": "F", "date": "2024-12-07", "time": "16:10", "score1": null, "score2": null }, "17": { "team1": "ROQUE PÉREZ", "team2": "REAL STFC RC", "group": "F", "date": "2024-12-07", "time": "17:20", "score1": null, "score2": null }, "18": { "team1": "ATHLETIC", "team2": "CAÑUELAS F.C. (BLANCO)", "group": "C", "date": "2024-12-07", "time": "18:30", "score1": null, "score2": null }, "19": { "team1": "DORREGO", "team2": "BANFIELD", "group": "D", "date": "2024-12-07", "time": "19:40", "score1": null, "score2": null }, "20": { "team1": "PROVINCIAL", "team2": "DEFENSA Y JUSTICIA", "group": "B", "date": "2024-12-07", "time": "22:30", "score1": null, "score2": null }, "21": { "team1": "URIBE (VERDE)", "team2": "EL PORVENIR (MERLO)", "group": "A", "date": "2024-12-08", "time": "14:30", "score1": null, "score2": null }, "22": { "team1": "ATHLETIC", "team2": "LA BLANQUITA (MERLO)", "group": "C", "date": "2024-12-08", "time": "15:40", "score1": null, "score2": null }, "23": { "team1": "ROQUE PÉREZ", "team2": "TRISTÁN SUÁREZ", "group": "F", "date": "2024-12-08", "time": "16:50", "score1": null, "score2": null }, "24": { "team1": "SALGADO", "team2": "DEFENSA Y JUSTICIA", "group": "B", "date": "2024-12-08", "time": "18:00", "score1": null, "score2": null }, "25": { "team1": "E.F.I.N. (NAVARRO)", "team2": "CAÑUELAS F.C. (BLANCO)", "group": "C", "date": "2024-12-08", "time": "19:10", "score1": null, "score2": null }, "26": { "team1": "RIVADAVIA", "team2": "REAL STFC", "group": "F", "date": "2024-12-08", "time": "20:20", "score1": null, "score2": null }, "27": { "team1": "MADRESELVA", "team2": "BANFIELD", "group": "D", "date": "2024-12-08", "time": "21:30", "score1": null, "score2": null }, "28": { "team1": "URIBE (AMARILLO)", "team2": "FERRO (LAS FLORES)", "group": "E", "date": "2024-12-09", "time": "14:00", "score1": null, "score2": null }, "29": { "team1": "MOSTRANDO CAMINOS", "team2": "CAÑUELAS F.C. (ROJO)", "group": "E", "date": "2024-12-09", "time": "15:10", "score1": null, "score2": null }, "30": { "team1": "BANFIELD", "team2": "PLAZA ESPAÑA (25 DE MAYO)", "group": "D", "date": "2024-12-09", "time": "17:20", "score1": null, "score2": null }, "31": { "team1": "HURACÁN (SALADILLO)", "team2": "DEFENSA Y JUSTICIA", "group": "B", "date": "2024-12-09", "time": "18:25", "score1": null, "score2": null }, "32": { "team1": "DORREGO", "team2": "PLAZA ESPAÑA (25 DE MAYO)", "group": "D", "date": "2024-12-09", "time": "19:30", "score1": null, "score2": null }, "33": { "team1": "SALGADO", "team2": "HURACÁN (SALADILLO)", "group": "B", "date": "2024-12-09", "time": "20:40", "score1": null, "score2": null }, "34": { "team1": "E.F.I.L.", "team2": "SAN MARTÍN (MONTE GRANDE) NEGRO", "group": "A", "date": "2024-12-09", "time": "21:50", "score1": null, "score2": null }, "35": { "team1": "ATHLETIC", "team2": "E.F.I.N. (NAVARRO)", "group": "C", "date": "2024-12-09", "time": "23:00", "score1": null, "score2": null }, "36": { "team1": "PROVINCIAL", "team2": "HURACÁN (SALADILLO)", "group": "B", "date": "2024-12-10", "time": "13:10", "score1": null, "score2": null } }, "teams": {}, "groups": {}, "config": { "tournamentName": "Torneo Nacional EFIL 2025", "adminPass": "efil2025" }, "alerts": {} };
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+            statusDiv.style.display = 'block';
+        }
+
+        async function importData() {
+            const btn = document.getElementById('importBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Importando...';
+
+            showStatus('⏳ Subiendo 36 partidos a Firebase...', 'info');
+
+            try {
+                // Upload to Firebase
+                await db.collection('efil_data').doc('efil_data').set(tournamentData);
+
+                showStatus('✅ ¡Datos importados correctamente! Abre tu app para ver los partidos.', 'success');
+                btn.textContent = '✅ Importación Completada';
+                btn.style.background = '#28a745';
+
+                console.log('✅ Datos importados:', tournamentData);
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showStatus('❌ Error: ' + error.message + ' - Verifica que las reglas de Firebase permitan escritura.', 'error');
+                btn.disabled = false;
+                btn.textContent = '🔄 Reintentar Importación';
+            }
+        }
+    </script>
+</body>
+
+</html>

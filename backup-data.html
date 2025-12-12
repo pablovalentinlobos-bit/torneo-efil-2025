@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Respaldo de Datos - EFIL 2025</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f4f4f9;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            text-align: left;
+            background: #eee;
+            padding: 15px;
+            overflow: auto;
+            max-height: 300px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>💾 Copia de Seguridad de Supabase</h1>
+    <p>Haz clic para descargar todos los datos actuales de la base de datos.</p>
+
+    <button onclick="downloadBackup()">DESCARGAR RESPALDO (.JSON)</button>
+
+    <div id="status"></div>
+    <pre id="preview"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://ptainvpdikcsagwusdjb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0YWludnBkaWtjc2Fnd3VzZGpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMTk2MDQsImV4cCI6MjA4MDc5NTYwNH0.FCvdDLf-TyGLRWjExyQqoJ_7vX6zj9X9dUwYpYn52Wo';
+
+        // Log to screen helper
+        function log(msg, color = 'black') {
+            const status = document.getElementById('status');
+            status.innerHTML += `<div style="color:${color}">${msg}</div>`;
+            console.log(msg);
+        }
+
+        async function downloadBackup() {
+            const btn = document.querySelector('button');
+            const preview = document.getElementById('preview');
+            document.getElementById('status').innerHTML = ''; // Clear previous logs
+
+            btn.disabled = true;
+            btn.textContent = 'Descargando...';
+
+            log('Iniciando proceso...', '#555');
+
+            try {
+                let matches = [];
+                let cups = [];
+
+                // ATTEMPT 1: Try via SDK
+                if (window.supabase) {
+                    log('Intentando vía Supabase SDK...', '#007bff');
+                    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    const { data, error } = await supabase.from('matches').select('*').order('id', { ascending: true });
+
+                    if (error) {
+                        log('SDK Error: ' + JSON.stringify(error), 'orange');
+                        throw error;
+                    }
+                    if (data) {
+                        matches = data;
+                        log(`✅ SDK: ${matches.length} partidos encontrados.`, 'green');
+
+                        // Try cups
+                        const { data: cupsData } = await supabase.from('cups').select('*');
+                        if (cupsData) cups = cupsData;
+                    }
+                } else {
+                    log('⚠️ Supabase SDK no cargó. Intentando modo directo...', 'orange');
+                    throw new Error("SDK Missing");
+                }
+
+            } catch (sdkError) {
+                // ATTEMPT 2: Direct Fetch
+                log(`⚠️ Falló SDK (${sdkError.message}). Probando Fetch directo...`, '#d63384');
+
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/matches?select=*&order=id.asc`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+                    matches = await response.json();
+                    log(`✅ Fetch: ${matches.length} partidos encontrados.`, 'green');
+
+                    // Try cups via fetch
+                    try {
+                        const cupsRes = await fetch(`${SUPABASE_URL}/rest/v1/cups?select=*`, {
+                            method: 'GET',
+                            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                        });
+                        if (cupsRes.ok) cups = await cupsRes.json();
+                    } catch (e) { console.warn('Cups fetch failed', e); }
+
+                } catch (fetchError) {
+                    log('❌ ERROR FATAL: No se pudo conectar.', 'red');
+                    log(fetchError.toString(), 'red');
+                    btn.disabled = false;
+                    btn.textContent = 'Reintentar';
+                    return;
+                }
+            }
+
+            // Success handling
+            const backupData = {
+                timestamp: new Date().toISOString(),
+                matches: matches, // Should use the matches variable from above scopes
+                cups: cups || []
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "backup-efil-2025-" + Date.now() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+
+            log('✅ Archivo descargado.', 'green');
+            btn.textContent = '✅ Descarga Completa';
+            btn.disabled = false;
+
+            preview.style.display = 'block';
+            preview.textContent = `Resumen:\nMatches: ${matches ? matches.length : 0}\nCups: ${cups ? cups.length : 0}`;
+        }
+    </script>
+</body>
+
+</html>

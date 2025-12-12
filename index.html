@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo Nacional EFIL 2025</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">EFIL 2025</div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" onclick="navigateTo('home'); return false;" class="active">Inicio</a></li>
+                <li><a href="#" onclick="navigateTo('standings'); return false;">Tabla</a></li>
+                <li><a href="#" onclick="navigateTo('matches'); return false;">Partidos</a></li>
+                <li><a href="#" onclick="navigateTo('copas'); return false;">Copas</a></li>
+                <li><a href="#" onclick="navigateTo('admin'); return false;">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container main-content">
+
+        <!-- HOME VIEW -->
+        <section id="home" class="view active">
+            <div class="hero" style="padding: 0; background: transparent; box-shadow: none; text-align: center;">
+                <img src="banner_main.jpg" alt="Torneo Nacional EFIL 2025"
+                    style="width: 100%; max-width: 800px; height: auto; border-radius: 12px; box-shadow: var(--shadow); display: block; margin: 0 auto;">
+
+                <div class="hero-actions" style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="navigateTo('standings')">Ver Tabla</button>
+                    <button class="btn btn-outline" style="background: white; color: var(--primary);"
+                        onclick="navigateTo('matches')">Ver Partidos</button>
+                </div>
+            </div>
+
+            <!-- ALERTS SECTION -->
+            <div id="alerts-container" class="alerts-container">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- STANDINGS VIEW -->
+        <section id="standings" class="view">
+            <h2>Tabla de Posiciones</h2>
+            <div id="standings-container">
+                <!-- Populated by JS (One table per group) -->
+            </div>
+        </section>
+
+        <!-- MATCHES VIEW -->
+        <section id="matches" class="view">
+            <h2>Resultados y Fixture</h2>
+            <div id="matches-list" class="matches-grid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- COPAS VIEW -->
+        <section id="copas" class="view">
+            <h2>Copas</h2>
+            <div id="copas-container">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- ADMIN LOGIN VIEW -->
+        <section id="admin-login" class="view">
+            <div class="login-card">
+                <h2>Acceso Administrador</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="admin-user" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="admin-pass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ADMIN DASHBOARD VIEW -->
+        <section id="admin-dashboard" class="view">
+            <div class="admin-header">
+                <h2>Panel de Administración</h2>
+                <button class="btn btn-outline" style="color: var(--text-main); border-color: var(--border);"
+                    onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <div class="admin-grid">
+                <!-- COPAS MANAGEMENT -->
+                <div class="card full-width">
+                    <h3>Gestionar Copas</h3>
+                    <form id="add-cup-form">
+                        <div class="form-group">
+                            <label>Nombre de la Copa</label>
+                            <input type="text" id="cup-name" required placeholder="Ej. Copa de Oro">
+                        </div>
+                        <button type="button" onclick="createCup(document.getElementById('cup-name').value)"
+                            class="btn btn-primary">Crear Copa</button>
+                    </form>
+                    <div id="admin-cups-list" style="margin-top: 20px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- CONFIGURATION -->
+                <div class="card full-width">
+                    <h3>Configuración</h3>
+                    <form id="change-password-form" style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Nueva Contraseña de Administrador</label>
+                            <input type="password" id="new-admin-pass" required placeholder="Nueva contraseña">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-bottom: 15px;">Cambiar</button>
+                    </form>
+
+                    <hr>
+                    <h3>Copia de Seguridad</h3>
+                    <p style="font-size: 14px; color: #666;">Descarga una copia de todos los datos que ves en pantalla.
+                    </p>
+                    <button onclick="downloadLocalBackup()" class="btn btn-primary"
+                        style="background-color: #28a745;">💾 Descargar Datos (.json)</button>
+                </div>
+
+                <!-- ALERTS MANAGEMENT -->
+                <div class="card full-width">
+                    <h3>Gestionar Alertas</h3>
+                    <form id="add-alert-form">
+                        <div class="form-group">
+                            <label>Mensaje de Alerta</label>
+                            <input type="text" id="alert-message" required
+                                placeholder="Ej. Cambio de horario partido X vs Y">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publicar</button>
+                    </form>
+                    <div id="admin-alerts-list" style="margin-top: 15px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- GROUP MANAGEMENT -->
+                <div class="card">
+                    <h3>Crear Grupo</h3>
+                    <form id="add-group-form">
+                        <div class="form-group">
+                            <label>Nombre del Grupo</label>
+                            <input type="text" id="group-name" required placeholder="Ej. Grupo A">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear</button>
+                    </form>
+                    <ul id="admin-groups-list" style="margin-top: 15px; list-style: none;">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- TEAM MANAGEMENT -->
+                <div class="card">
+                    <h3>Agregar Equipo</h3>
+                    <form id="add-team-form">
+                        <div class="form-group">
+                            <label>Nombre del Equipo</label>
+                            <input type="text" id="team-name" required placeholder="Ej. Los Rayos">
+                        </div>
+                        <div class="form-group">
+                            <label>Grupo (Opcional)</label>
+                            <select id="team-group">
+                                <option value="">Sin Grupo</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar Equipo</button>
+                    </form>
+                    <div id="admin-teams-list" style="margin-top: 15px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MATCH MANAGEMENT -->
+            <div class="card full-width">
+                <h3>Crear Partido</h3>
+                <form id="add-match-form">
+                    <div class="form-group">
+                        <label>Local</label>
+                        <select id="match-home" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Visitante</label>
+                        <select id="match-away" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Copa (Opcional)</label>
+                        <select id="match-cup">
+                            <option value="">Ninguna (Liga)</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Instancia (Solo Copas)</label>
+                        <input type="text" id="match-instance" placeholder="Ej. Semifinal, Final">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha/Hora</label>
+                        <input type="datetime-local" id="match-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Jornada (n°)</label>
+                        <input type="number" id="match-day" min="1" placeholder="Ej. 7" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear Partido</button>
+                </form>
+            </div>
+
+            <div class="card full-width">
+                <h3>Gestionar Partidos y Resultados</h3>
+                <div id="admin-matches-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Firebase Compat SDKs (Works on file://) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script src="app.js?v=final_retry"></script>
+</body>
+
+</html>

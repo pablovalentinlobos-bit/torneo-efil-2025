@@ -1,0 +1,34 @@
+# Comandos para subir a GitHub Pages
+
+# 1. Navegar a la carpeta del proyecto
+cd c:\Users\USUARIO\.gemini\antigravity\playground\pyro-spirit
+
+# 2. Inicializar repositorio Git
+git init
+
+# 3. Agregar todos los archivos
+git add .
+
+# 4. Hacer el primer commit
+git commit -m "Initial commit - Torneo EFIL 2025"
+
+# 5. Cambiar a la rama main
+git branch -M main
+
+# 6. Conectar con tu repositorio de GitHub
+# IMPORTANTE: Reemplaza "TU-USUARIO" con tu nombre de usuario de GitHub
+git remote add origin https://github.com/TU-USUARIO/torneo-efil-2025.git
+
+# 7. Subir los archivos a GitHub
+git push -u origin main
+
+# ========================================
+# DESPUÉS DE EJECUTAR ESTOS COMANDOS:
+# ========================================
+# 1. Ve a tu repositorio en GitHub
+# 2. Click en "Settings" (Configuración)
+# 3. En el menú izquierdo, click en "Pages"
+# 4. En "Source", selecciona "main" branch
+# 5. Click en "Save"
+# 6. Espera 1-2 minutos y tu sitio estará en:
+#    https://TU-USUARIO.github.io/torneo-efil-2025/

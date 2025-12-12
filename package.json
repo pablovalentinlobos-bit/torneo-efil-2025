@@ -1,0 +1,12 @@
+{
+    "name": "efil-2025-import",
+    "version": "1.0.0",
+    "description": "Import tournament data to Firebase",
+    "main": "import-data.js",
+    "scripts": {
+        "import": "node import-data.js"
+    },
+    "dependencies": {
+        "firebase-admin": "^12.0.0"
+    }
+}
