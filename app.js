@@ -256,11 +256,15 @@ function renderCups() {
             `;
         }).join('') : '<p style="color:#888;font-style:italic">No hay partidos programados.</p>';
 
+        const deleteBtn = state.isAuthenticated
+            ? `<button onclick="deleteCup('${cup.id}')" style="background:red;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.7em;">Eliminar Copa</button>`
+            : '';
+
         return `
         <div class="cup-card" style="background:#fff;padding:15px;margin:10px 0;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)">
             <h3 style="margin:0 0 10px 0;display:flex;justify-content:space-between;border-bottom:2px solid #00adef;padding-bottom:5px;">
                 ${cup.name}
-                <button onclick="deleteCup('${cup.id}')" style="background:red;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:0.7em;">Eliminar Copa</button>
+                ${deleteBtn}
             </h3>
             <div class="cup-matches-list">
                 ${matchesHtml}
