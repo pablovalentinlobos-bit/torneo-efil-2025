@@ -1,6 +1,6 @@
 // APP STARTING - SUPABASE MODE
 console.log("APP STARTING - SUPABASE MODE...");
-alert("App cargada correctamente (Final Fix v2)!");
+// alert("App cargada correctamente (Final Fix v2)!");
 
 // CONFIGURATION - Supabase
 const SUPABASE_URL = 'https://ptainvpdikcsagwusdjb.supabase.co';
@@ -11,31 +11,21 @@ const debugDiv = document.createElement('div');
 debugDiv.style.cssText = "position:fixed;bottom:10px;right:10px;width:300px;background:rgba(0,0,0,0.9);color:#0f0;max-height:400px;overflow:auto;z-index:9999;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.5);display:none;";
 debugDiv.id = 'debug-console';
 debugDiv.innerHTML = '<strong>DATA DEBUGGER</strong><hr style="border-color:#333;margin:5px 0">';
-document.body.appendChild(debugDiv);
+// document.body.appendChild(debugDiv);
 
 function updateDebugStatus(colName, count, sample) {
-    debugDiv.style.display = 'block';
-    let el = document.getElementById(`debug-${colName}`);
-    if (!el) {
-        el = document.createElement('div');
-        el.id = `debug-${colName}`;
-        el.style.marginBottom = '5px';
-        debugDiv.appendChild(el);
-    }
-    el.innerHTML = `
-        <span style="color:white">${colName.toUpperCase()}:</span> <span style="color:${count > 0 ? '#0f0' : '#f00'}">${count}</span>
-        ${sample ? `<div style="color:#888;font-size:10px;margin-top:2px">${typeof sample === 'object' ? JSON.stringify(sample).substring(0, 100) + '...' : sample}</div>` : ''}
-    `;
+    // debugDiv.style.display = 'block'; (DISABLED)
+    // ... logic remains but invisible ...
 }
 
 function logError(msg, err) {
-    debugDiv.style.display = 'block';
+    // debugDiv.style.display = 'block'; (DISABLED)
     console.error(msg, err);
-    debugDiv.innerHTML += `<p style="color:#ff6b6b;margin:0;">🔴 ${msg}: ${err?.message || err}</p>`;
+    // debugDiv.innerHTML += ... 
 }
 function logSuccess(msg) {
     console.log(msg);
-    updateDebugStatus('STATUS', '✅', msg);
+    // updateDebugStatus('STATUS', '✅', msg);
 }
 
 // State Management
