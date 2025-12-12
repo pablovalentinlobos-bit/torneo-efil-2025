@@ -216,7 +216,10 @@ function renderCups() {
         return;
     }
 
-    container.innerHTML = state.cups.map(cup => {
+    // Sort cups alphabetically (Oros first vs Platas)
+    const sortedCups = [...state.cups].sort((a, b) => a.name.localeCompare(b.name));
+
+    container.innerHTML = sortedCups.map(cup => {
         // Filter matches for this cup
         const cupMatches = state.matches.filter(m => {
             return m.originalData && m.originalData.cup_id === cup.id;
