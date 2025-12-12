@@ -558,6 +558,18 @@ function navigateTo(id) {
         }
     }
 
+    // Update active state in Top Nav
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('onclick')?.includes(`'${id}'`)) a.classList.add('active');
+    });
+
+    // Update active state in Bottom Nav
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('onclick')?.includes(`'${id}'`)) a.classList.add('active');
+    });
+
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) {
