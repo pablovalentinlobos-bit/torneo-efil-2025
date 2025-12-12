@@ -249,10 +249,16 @@ function renderCups() {
 
             return `
             <div style="border-top:1px solid #eee; padding: 10px 0; display:flex; justify-content:space-between; align-items:center;">
-                <div style="flex:1;">
+                <div style="flex:1; padding-right:10px; min-width:0;">
                     ${instanceLabel}
-                    <div style="font-weight:bold; font-size: 1.1em;">${h.name} <span style="background:#333;color:white;padding:2px 6px;border-radius:4px;margin:0 5px;">${m.played ? m.homeScore : '-'}</span></div>
-                    <div style="font-weight:bold; font-size: 1.1em;">${a.name} <span style="background:#333;color:white;padding:2px 6px;border-radius:4px;margin:0 5px;">${m.played ? m.awayScore : '-'}</span></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-weight:bold; font-size: 1.1em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.name}</span>
+                        <span style="flex-shrink:0; background:#333; color:white; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:1.1em; margin-left:8px;">${m.played ? m.homeScore : '-'}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:bold; font-size: 1.1em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.name}</span>
+                        <span style="flex-shrink:0; background:#333; color:white; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:1.1em; margin-left:8px;">${m.played ? m.awayScore : '-'}</span>
+                    </div>
                 </div>
                 <div style="text-align:right; font-size:0.9em; color:#666; display:flex; flex-direction:column; align-items:flex-end;">
                     ${dateHtml}
